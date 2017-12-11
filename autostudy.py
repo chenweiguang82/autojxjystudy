@@ -6,7 +6,7 @@ This is a temporary script file.
 """
 
 from selenium import webdriver
-import sys,time
+import time, sys
 
 class Course(object):
     def __init__(self,driver,link_text,xpath,course_class_name):
@@ -73,7 +73,8 @@ def CountDown(Seconds):
 
 ###############
 driver = webdriver.Chrome('C:\Program Files (x86)\Google\Chrome\Application\chromedriver.exe')
-driver.get('http://szpx.haacee.org.cn')
+#driver.get('http://szpx.haacee.org.cn')
+driver.get('http://zjpx.hnhhlearning.com/')
 CountDown(10)
 print('已登录网站：%s' %(driver.title))
 print('请在30秒钟之内登录')
@@ -81,7 +82,7 @@ CountDown(30)
 #登录
 #之后运行下面的
 
-courses = Course(driver,'学习','//embed','homelinetable-dashed-bom')
+courses = Course(driver,'进入学习','//embed','homelinetable-dashed-bom')
 courses.print_current_status()
 #embed=driver.find_element_by_xpath('/html/body/div[3]/div[2]/div[2]/div[2]/div[2]/div[2]/div[3]/div/div/table/tbody/tr[2]/td[3]/embed')
 while courses.is_finished != False:
@@ -99,15 +100,21 @@ while courses.is_finished != False:
         for handle in all_handles:
             if handle != chapter_windows:
                 driver.switch_to_window(handle)
-                
+             
+        video=driver.find_element_by_id('p2ps_video')
+        video.click()
         progress=driver.find_element_by_id('div_ProgressBar_value')
-        while int(progress.text.split('%')[0]) != 100:
-            if AutoAnswer(driver):
-                print('\n已自动答题')
+        while True:
+            prog=int(progress.text.split('%')[0])
+            if prog != 100:
+                if AutoAnswer(driver):
+                    print('\n已自动答题')
+                    time.sleep(10)
+                else:
+                    sys.stdout.write('\r正在学习中...%3d%%\r' %(prog))
+                    time.sleep(60)
             else:
-                sys.stdout.write('\r正在学习中...%3d%%\r' %(int(progress.text.split('%')[0])))
-                time.sleep(30)
-        
+                break
         driver.close()
         driver.switch_to_window(chapter_windows)
         driver.refresh()
@@ -116,7 +123,7 @@ while courses.is_finished != False:
     
     driver.back()
     driver.refresh()
-    CountDown(10)
+    time.sleep(10)
     courses = Course(driver,'学习','//embed','homelinetable-dashed-bom')
     
 print('你的课程已经全部完成')
